@@ -1,5 +1,5 @@
 
-
+const mongoose = require('mongoose')
 const { on } = require('../app')
 const listHelper = require('../utils/list_helper')
 const logger = require('../utils/logger')
@@ -90,4 +90,8 @@ test('returns author and number of total likes', () => {
                           likes: 17
                         })
 })
+})
+
+afterAll(() => {
+  mongoose.connection.close()
 })
