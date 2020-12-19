@@ -44,6 +44,7 @@ describe('adding blogs', () => {
 
     await api
         .post('/api/blogs')
+        .set({Authorization: 'bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkaWtvbCIsImlkIjoiNWZkZDBjOWMwNTcyMjYxODZiZWFkYzQ3IiwiaWF0IjoxNjA4MzgwNTc4fQ.WtJLj0ahiEp-aIc_iu_oJO0oxeHsZCf62yMO8PBhj54'})
         .send(newBlog)
         .expect(200)
         .expect('Content-Type', /application\/json/)
@@ -66,6 +67,7 @@ describe('adding blogs', () => {
 
     await api
         .post('/api/blogs')
+        .set({Authorization: 'bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkaWtvbCIsImlkIjoiNWZkZDBjOWMwNTcyMjYxODZiZWFkYzQ3IiwiaWF0IjoxNjA4MzgwNTc4fQ.WtJLj0ahiEp-aIc_iu_oJO0oxeHsZCf62yMO8PBhj54'})
         .send(newBlog)
         .expect(200)
         .expect('Content-Type', /application\/json/)
@@ -85,6 +87,7 @@ describe('adding blogs', () => {
 
     await api
         .post('/api/blogs')
+        .set({Authorization: 'bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkaWtvbCIsImlkIjoiNWZkZDBjOWMwNTcyMjYxODZiZWFkYzQ3IiwiaWF0IjoxNjA4MzgwNTc4fQ.WtJLj0ahiEp-aIc_iu_oJO0oxeHsZCf62yMO8PBhj54'})
         .send(newBlog)
         .expect(400)
 
@@ -93,17 +96,37 @@ describe('adding blogs', () => {
     })
 })
 
-describe('deleting blogs', () => {
-    test('delete a blog with a given id', async () => {
-    const blogsAtStart = await helper.blogsInDb()
-    const blogToDelete = blogsAtStart[0]
-
-    await api
-        .delete(`/api/blogs/${blogToDelete.id}`)
-        .expect(204)
-
-    const blogsAtEnd = await helper.blogsInDb()
-    expect(blogsAtEnd).toHaveLength(helper.initialBlogs.length - 1)
+describe('when there is initially one user in db', () => {
+    beforeEach(async () => {
+      await User.deleteMany({})
+  
+      const passwordHash = await bcrypt.hash('sekret', 10)
+      const user = new User({ username: 'root', passwordHash })
+  
+      await user.save()
+    })
+  
+    test('creation succeeds with a fresh username', async () => {
+      const usersAtStart = await helper.usersInDb()
+  
+      const newUser = {
+        username: 'aditya14',
+        name: 'Aditya Kolachana',
+        password: 'secret',
+      }
+  
+      await api
+        .post('/api/users')
+        .set({Authorization: 'bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkaWtvbCIsImlkIjoiNWZkZDBjOWMwNTcyMjYxODZiZWFkYzQ3IiwiaWF0IjoxNjA4MzgwNTc4fQ.WtJLj0ahiEp-aIc_iu_oJO0oxeHsZCf62yMO8PBhj54'})
+        .send(newUser)
+        .expect(200)
+        .expect('Content-Type', /application\/json/)
+  
+      const usersAtEnd = await helper.usersInDb()
+      expect(usersAtEnd).toHaveLength(usersAtStart.length + 1)
+  
+      const usernames = usersAtEnd.map(u => u.username)
+      expect(usernames).toContain(newUser.username)
     })
 })
 
@@ -118,12 +141,28 @@ describe('updating blogs', () => {
 
     await api
         .put(`/api/blogs/${blogToUpdate.id}`)
+        .set({Authorization: 'bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkaWtvbCIsImlkIjoiNWZkZDBjOWMwNTcyMjYxODZiZWFkYzQ3IiwiaWF0IjoxNjA4MzgwNTc4fQ.WtJLj0ahiEp-aIc_iu_oJO0oxeHsZCf62yMO8PBhj54'})
         .send(blog)
         .expect(200)
 
         const blogsAtEnd = await helper.blogsInDb()
         expect(blogsAtEnd).toHaveLength(helper.initialBlogs.length)
         expect(blogsAtEnd[0].likes).toBe(7)
+    })
+})
+
+describe('deleting blogs', () => {
+    test('delete a blog with a given id', async () => {
+    const blogsAtStart = await helper.blogsInDb()
+    const blogToDelete = blogsAtStart[0]
+
+    await api
+        .delete(`/api/blogs/${blogToDelete.id}`)
+        .set({Authorization: 'bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkaWtvbCIsImlkIjoiNWZkZDBjOWMwNTcyMjYxODZiZWFkYzQ3IiwiaWF0IjoxNjA4MzgwNTc4fQ.WtJLj0ahiEp-aIc_iu_oJO0oxeHsZCf62yMO8PBhj54'})
+        .expect(204)
+
+    const blogsAtEnd = await helper.blogsInDb()
+    expect(blogsAtEnd).toHaveLength(helper.initialBlogs.length - 1)
     })
 })
 
